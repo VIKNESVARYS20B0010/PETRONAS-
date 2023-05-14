@@ -1,0 +1,27 @@
+import os
+from azure.ai.textanalytics import TextAnalyticsClient
+from azure.core.credentials import AzureKeyCredential
+
+# Set up the credentials for the Text Analytics API
+credential = AzureKeyCredential(os.environ["810abd280f7a4611bb074fbe61987cc6"])
+endpoint = os.environ["https://petronasviki.cognitiveservices.azure.com/"]
+
+# Create a Text Analytics client
+text_analytics_client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
+
+# Define the PETRONAS report to analyze
+petronas_report = """
+PETRONAS today announced its financial results for the first quarter of 2023.
+"""
+
+# Call the Text Analytics API to extract key phrases and entities
+response = text_analytics_client.recognize_entities(documents=[petronas_report])[0]
+
+# Print the extracted key phrases and entities
+print("Key phrases:")
+for phrase in response.key_phrases:
+    print(phrase)
+
+print("\nEntities:")
+for entity in response.entities:
+    print(entity.text, entity.category)
