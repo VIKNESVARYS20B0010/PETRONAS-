@@ -1,0 +1,26 @@
+import pandas as pd
+import os
+from azure.ai.textanalytics import TextAnalyticsClient
+from azure.core.credentials import AzureKeyCredential
+
+# Set up the credentials for the Text Analytics API
+credential = AzureKeyCredential(os.environ["810abd280f7a4611bb074fbe61987cc6"])
+endpoint = os.environ["https://petronasviki.cognitiveservices.azure.com/"]
+
+# Create a Text Analytics client
+text_analytics_client = TextAnalyticsClient(endpoint=endpoint, credential=credential)
+
+# Define the function to extract key phrases and entities from a text document
+def extract_entities(text):
+    response = text_analytics_client.recognize_entities(documents=[text])[0]
+    return [entity.text for entity in response.entities]
+
+# Load the PETRONAS reports dataset
+petronas_reports = pd.read_csv("petronas_reports.csv")
+
+# Preprocess the dataset and extract the key phrases and entities
+petronas_reports["text"] = petronas_reports["text"].apply(lambda x: x.replace("\n", " "))
+petronas_reports["entities"] = petronas_reports["text"].apply(lambda x: extract_entities(x))
+
+# Save the preprocessed dataset
+petronas_reports.to_csv("petronas_reports_preprocessed.csv", index=False)
